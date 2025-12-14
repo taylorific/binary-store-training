@@ -13,10 +13,6 @@ hideInToc: true
 ---
 
 ```
-tar -tzf archive.tar.gz
-```
-
-```
 default['nexus_repository_manager']['sonatype']['path'] = '/opt/sonatype'
 default['nexus_repository_manager']['nexus_data']['path'] = '/nexus-data'
 # sonatype-work
@@ -25,37 +21,70 @@ default['nexus_repository_manager']['sonatype_work']['path'] = default['nexus_re
 default['nexus_repository_manager']['nexus_home']['path'] = default['nexus_repository_manager']['sonatype']['path'] + '/nexus'
 
 
+./nexus-3.78.0-14 # Application Directory
+./sonatype-work   # Parent of the default Data Directory
+```
+
+---
+hideInToc: true
+---
+
+```bash
+# Install Java
+sudo apt-get update
+sudo apt-get install openjdk-17-jdk
+
 # Create user for ROS
 sudo useradd \
   --system \
   --shell /bin/false \
-  --comment "Nexus Repository Manager user" \<img width="1325" height="982" alt="2025-12-10_19-22-21" src="https://github.com/user-attachments/assets/15609a23-1134-4de9-97c4-f254676c1bb4" />
-
+  --comment "Nexus Repository Manager user" \
   --home-dir /opt/sonatype/nexus \
   nexus
 
 sudo groupadd --system nexus
+```
 
-echo "nexus ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee "/etc/sudoers.d/dont-prompt-ros-for-sudo-password"
-sudo su - nexus
+---
+hideInToc: true
+---
 
-sudo apt update
-sudo apt install openjdk-17-jdk
-
+```bash
 # https://help.sonatype.com/en/download.html
-$ curl -LO https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-x86_64.tar.gz
-$ shasum -a 256 nexus-3.87.1-01-linux-x86_64.tar.gz 
+$ curl -o /tmp/nexus-linux-x86_64.tar.gz \
+    -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-x86_64.tar.gz
+$ shasum -a 256 /tmp/nexus-linux-x86_64.tar.gz
 9403cc4a78e11af09fc65e217e381dfcf435755dea31cdba9c947d6e1d439cd7  nexus-3.87.1-01-linux-x86_64.tar.gz
 
-cd /opt
-tar xvz --keep-directory-symlink -f ./nexus-3.87.1-01-linux-x86_64.tar.gz 
-
-tar -xvzf /path/to/nexus-3.87.1-01-linux-x86_64.tar.gz \
-  --directory=/opt \
+mkdir -p /opt/sonatype
+tar -xvzf /tmp/nexus-linux-x86_64.tar.gz \
+  --directory=/opt/sonatype \
   --keep-directory-symlink
 
-./nexus-3.78.0-14 # Application Directory
-./sonatype-work   # Parent of the default Data Directory
+$ curl -o /tmp/nexus-linux-aarch_64.tar.gz \
+    -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-aarch_64.tar.gz
+$ shasum -a 256 /tmp/nexus-linux-aarch_64.tar.gz
+35847fc66895d3bd5cf8582b4d6c22161a00ce36924aed19f9b38107334b2ebb  /tmp/nexus-linux-aarch_64.tar.gz
+
+mkdir -p /opt/sonatype
+tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
+  --directory=/opt/sonatype \
+  --keep-directory-symlink
+```
+
+```bash
+# Pick the latest version explicitly
+ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
+
+sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
+```
+
+```bash
+cat <<EOF > /opt/sonatype/nexus/bin/nexus.rc
+run_as_user="nexus"
+EOF
+
+sudo -u nexus /opt/sonatype/nexus/bin/nexus run
 ```
 
 ---
