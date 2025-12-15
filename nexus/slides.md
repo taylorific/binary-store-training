@@ -9,6 +9,16 @@ layout: section
 <Link to="toc" title="Table of Contents"/>
 
 ---
+layout: section
+---
+
+# Install self-hosted Nexus Repository
+
+<br>
+<br>
+<Link to="toc" title="Table of Contents"/>
+
+---
 hideInToc: true
 ---
 
@@ -29,12 +39,17 @@ default['nexus_repository_manager']['nexus_home']['path'] = default['nexus_repos
 hideInToc: true
 ---
 
+# Install Java and create nexus user
+
 ```bash
 # Install Java
 sudo apt-get update
+# Java 17 supported on Sonatype Nexux 3.69.0 or later
 sudo apt-get install openjdk-17-jdk
+# Java 21 supported on Sonatype Nexus 3.87.0 or later
+sudo apt-get install openjdk-21-jdk
 
-# Create user for ROS
+# Create user for nexus
 sudo useradd \
   --system \
   --shell /bin/false \
@@ -49,8 +64,12 @@ sudo groupadd --system nexus
 hideInToc: true
 ---
 
+# Download and unpack the install archive
+
 ```bash
 # https://help.sonatype.com/en/download.html
+
+## x86_64
 $ curl -o /tmp/nexus-linux-x86_64.tar.gz \
     -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-x86_64.tar.gz
 $ shasum -a 256 /tmp/nexus-linux-x86_64.tar.gz
@@ -61,6 +80,7 @@ tar -xvzf /tmp/nexus-linux-x86_64.tar.gz \
   --directory=/opt/sonatype \
   --keep-directory-symlink
 
+## aarch64
 $ curl -o /tmp/nexus-linux-aarch_64.tar.gz \
     -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-aarch_64.tar.gz
 $ shasum -a 256 /tmp/nexus-linux-aarch_64.tar.gz
@@ -79,13 +99,35 @@ ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
 sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
 ```
 
+---
+hideInToc: true
+---
+
 ```bash
+# https://help.sonatype.com/en/configuring-the-runtime-environment.html
+
+mkdir /opt/sonatype/sonatype-work/nexus3/javaprefs
+chown -R nexus:nexus /opt/sonatype/sonatype-work/nexus3
+# Add the following to /opt/sonatype/nexus/bin/nexus.vmoptions
+# This will avoid 'java.util.prefs' spamming the log 
+-Djava.util.prefs.userRoot=/opt/sonatype/sonatype-work/nexus3/javaprefs
+
 cat <<EOF > /opt/sonatype/nexus/bin/nexus.rc
 run_as_user="nexus"
 EOF
 
 sudo -u nexus /opt/sonatype/nexus/bin/nexus run
 ```
+
+---
+layout: section
+---
+
+# Docker install
+
+<br>
+<br>
+<Link to="toc" title="Table of Contents"/>
 
 ---
 hideInToc: true
