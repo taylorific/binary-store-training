@@ -22,53 +22,10 @@ layout: section
 hideInToc: true
 ---
 
-```
-default['nexus_repository_manager']['sonatype']['path'] = '/opt/sonatype'
-default['nexus_repository_manager']['nexus_data']['path'] = '/nexus-data'
-# sonatype-work
-default['nexus_repository_manager']['sonatype_work']['path'] = default['nexus_repository_manager']['sonatype']['path'] + '/sonatype-work'
-# nexus home
-default['nexus_repository_manager']['nexus_home']['path'] = default['nexus_repository_manager']['sonatype']['path'] + '/nexus'
-
-
-./nexus-3.78.0-14 # Application Directory
-./sonatype-work   # Parent of the default Data Directory
-```
-
----
-hideInToc: true
----
-
-# Install Java and create nexus user
-
-```bash
-# Install Java
-sudo apt-get update
-# Java 17 supported on Sonatype Nexux 3.69.0 or later
-sudo apt-get install openjdk-17-jdk
-# Java 21 supported on Sonatype Nexus 3.87.0 or later
-sudo apt-get install openjdk-21-jdk
-
-# Create user for nexus
-sudo useradd \
-  --system \
-  --shell /bin/false \
-  --comment "Nexus Repository Manager user" \
-  --home-dir /opt/sonatype/nexus \
-  nexus
-
-sudo groupadd --system nexus
-```
-
----
-hideInToc: true
----
-
 # Download and unpack the install archive
 
 ```bash
 # https://help.sonatype.com/en/download.html
-
 ## x86_64
 $ curl -o /tmp/nexus-linux-x86_64.tar.gz \
     -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-x86_64.tar.gz
@@ -79,24 +36,68 @@ mkdir -p /opt/sonatype
 tar -xvzf /tmp/nexus-linux-x86_64.tar.gz \
   --directory=/opt/sonatype \
   --keep-directory-symlink
+```  
 
+```bash
+# https://help.sonatype.com/en/download.html
 ## aarch64
 $ curl -o /tmp/nexus-linux-aarch_64.tar.gz \
     -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-aarch_64.tar.gz
 $ shasum -a 256 /tmp/nexus-linux-aarch_64.tar.gz
 35847fc66895d3bd5cf8582b4d6c22161a00ce36924aed19f9b38107334b2ebb  /tmp/nexus-linux-aarch_64.tar.gz
 
-mkdir -p /opt/sonatype
-tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
+sudo mkdir -p /opt/sonatype
+sudo tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
   --directory=/opt/sonatype \
   --keep-directory-symlink
 ```
 
 ```bash
+# Make a symlink to the latest version as /opt/sonatype/nexus to make it easier to upgrade
 # Pick the latest version explicitly
-ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
+sudo ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
+```
 
+---
+hideInToc: true
+---
+
+# Create data directory
+
+```bash
+# Create user for nexus
+sudo useradd \
+  --system \
+  --shell /bin/false \
+  --comment "Nexus Repository Manager user" \
+  --home-dir /var/lib/nexus \
+  nexus
+
+sudo mkdir -p /var/lib/nexus
+sudo chown -R nexus:nexus /var/lib/nexus
+
+# Define run_as_user as nexus
+sudo tee /opt/sonatype/nexus/bin/nexus.rc > /dev/null <<'EOF'
+run_as_user="nexus"
+EOF
+````
+
+```bash
 sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
+```
+
+---
+hideInToc: true
+---
+
+# Verify install starts up correctly
+
+```bash
+runuser -u nexus -- /bin/bash
+cd /opt/sonatype/nexus/bin
+./nexus run
+
+# Visit http://localhost:8081 in a web browser
 ```
 
 ---
@@ -106,17 +107,11 @@ hideInToc: true
 ```bash
 # https://help.sonatype.com/en/configuring-the-runtime-environment.html
 
-mkdir /opt/sonatype/sonatype-work/nexus3/javaprefs
-chown -R nexus:nexus /opt/sonatype/sonatype-work/nexus3
+mkdir -p /var/lib/nexus/javaprefs
+chown -R nexus:nexus /var/lib/nexus/javaprefs
 # Add the following to /opt/sonatype/nexus/bin/nexus.vmoptions
 # This will avoid 'java.util.prefs' spamming the log 
 -Djava.util.prefs.userRoot=/opt/sonatype/sonatype-work/nexus3/javaprefs
-
-cat <<EOF > /opt/sonatype/nexus/bin/nexus.rc
-run_as_user="nexus"
-EOF
-
-sudo -u nexus /opt/sonatype/nexus/bin/nexus run
 ```
 
 ---
