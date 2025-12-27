@@ -52,17 +52,27 @@ sudo tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
   --keep-directory-symlink
 ```
 
+---
+hideInToc: true
+---
+
+# Symlink latest version to /opt/sonatype/nexus
+
 ```bash
 # Make a symlink to the latest version as /opt/sonatype/nexus to make it easier to upgrade
 # Pick the latest version explicitly
 sudo ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
+
+# Verify
+$ readlink /opt/sonatype/nexus
+/opt/sonatype/nexus-3.87.1-01
 ```
 
 ---
 hideInToc: true
 ---
 
-# Create data directory
+# Create user for running Sonatype Nexus
 
 ```bash
 # Create user for nexus
@@ -81,6 +91,12 @@ sudo tee /opt/sonatype/nexus/bin/nexus.rc > /dev/null <<'EOF'
 run_as_user="nexus"
 EOF
 ````
+
+---
+hideInToc: true
+---
+
+# Create data directory
 
 ```bash
 sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
@@ -115,6 +131,64 @@ chown -R nexus:nexus /var/lib/nexus/javaprefs
 ```
 
 ---
+hideInToc: true
+---
+
+https://github.com/sonatype/nexus-public/issues/458
+
+# Choose a password for the admin user
+
+```bash
+newpass="superseekret"
+oldpass=$(cat /var/lib/nexus/nexus3/admin.password)
+
+curl --include --fail \
+  --user admin:$oldpass \
+  -X PUT \
+  -H 'Content-Type: text/plain' \
+  --data "${newpass}" \
+  http://localhost:8081/service/rest/v1/security/users/admin/change-password
+```
+
+---
+hideInToc: true
+---
+
+# Accept EULA
+
+https://help.sonatype.com/en/eula-rest-api.html
+
+```bash
+disclaimer=$(curl \
+  --silent --show-error \
+  -u admin:$(cat /var/lib/nexus/nexus3/admin.password) \
+  -X GET 'http://localhost:8081/service/rest/v1/system/eula' | \
+    jq --raw-output .disclaimer)
+
+curl --include --fail \
+  -X POST \
+  -u admin:$(cat /var/lib/nexus/nexus3/admin.password) \
+  -H 'Content-Type: application/json' \
+  -d "{\"accepted\": true, \"disclaimer\": \"${disclaimer}\"}" \
+  http://localhost:8081/service/rest/v1/system/eula
+```
+
+---
+hideInToc: true
+---
+
+# Configure Anonymous Access
+
+```bash
+curl --include --fail \
+  --user admin:$newpass \
+  -X PUT \
+  -H 'Content-Type: application/json' \
+  -d '{"enabled": true, "userId": "anonymous"}' \
+  http://localhost:8081/service/rest/v1/security/anonymous
+```
+
+---
 layout: section
 ---
 
@@ -138,6 +212,8 @@ docker container run -d \
 ---
 hideInToc: true
 ---
+
+# Accept EULA
 
 https://help.sonatype.com/en/eula-rest-api.html
 
