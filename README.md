@@ -6,7 +6,7 @@ To start the slide show:
 docker run -it --rm \
   --mount type=bind,source="$(pwd)",target="/slidev" \
   --publish 3030:3030 \
-  docker.io/boxcutter/slidev --remote
+  docker.io/boxcutter/slidev
 
 # Visit <http:/localhost:3030/>
 ```
@@ -14,6 +14,32 @@ docker run -it --rm \
 Edit the [slides.md](./slides.md) to see the changes.
 
 Learn more about Slidev at the [documentation](https://sli.dev/).
+
+# Update dependencies
+
+To see what is out of date:
+
+```bash
+docker run -it --rm \
+  --mount type=bind,source="$(pwd)",target="/slidev" \
+  --entrypoint npm \
+  docker.io/boxcutter/slidev outdated
+```
+
+To upgrade Slidev and the themes to their latest versions:
+
+```bash
+docker run -it --rm \
+  --mount type=bind,source="$(pwd)",target="/slidev" \
+  --entrypoint npm \
+  docker.io/boxcutter/slidev \
+    install @slidev/cli@latest @slidev/theme-default@latest @slidev/theme-seriph@latest
+
+# on the host
+git add package.json package-lock.json
+git commit -m "Sync npm lockfile"
+git push
+```
 
 # Attributions
 
