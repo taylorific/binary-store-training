@@ -24,117 +24,128 @@ hideInToc: true
 level: 2
 ---
 
-# Download and unpack the install archive
+# Download and check the install archive
+
+The archive bundles its own Java (Temurin 21), so there's nothing else to install.
 
 ```bash
 # https://help.sonatype.com/en/download.html
 ## x86_64
-$ curl -o /tmp/nexus-linux-x86_64.tar.gz \
-    -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-x86_64.tar.gz
-$ shasum -a 256 /tmp/nexus-linux-x86_64.tar.gz
-9403cc4a78e11af09fc65e217e381dfcf435755dea31cdba9c947d6e1d439cd7  nexus-3.87.1-01-linux-x86_64.tar.gz
-
-mkdir -p /opt/sonatype
-tar -xvzf /tmp/nexus-linux-x86_64.tar.gz \
-  --directory=/opt/sonatype \
-  --keep-directory-symlink
-```  
+curl -o /tmp/nexus-3.97.2-02-linux-x86_64.tar.gz \
+  -L https://download.sonatype.com/nexus/3/nexus-3.97.2-02-linux-x86_64.tar.gz
+echo "cda1837b8fde687989af423dabf00be471695679e736e3c527e35b6fcd88c2f5  /tmp/nexus-3.97.2-02-linux-x86_64.tar.gz" | \
+  sha256sum --check
+```
 
 ```bash
-# https://help.sonatype.com/en/download.html
 ## aarch64
-$ curl -o /tmp/nexus-linux-aarch_64.tar.gz \
-    -L https://download.sonatype.com/nexus/3/nexus-3.87.1-01-linux-aarch_64.tar.gz
-$ shasum -a 256 /tmp/nexus-linux-aarch_64.tar.gz
-35847fc66895d3bd5cf8582b4d6c22161a00ce36924aed19f9b38107334b2ebb  /tmp/nexus-linux-aarch_64.tar.gz
+curl -o /tmp/nexus-3.97.2-02-linux-aarch_64.tar.gz \
+  -L https://download.sonatype.com/nexus/3/nexus-3.97.2-02-linux-aarch_64.tar.gz
+echo "5d7bf1a6c5beb855060052272f4aec6bc661fe00f88abd1c657d8971d66022b5  /tmp/nexus-3.97.2-02-linux-aarch_64.tar.gz" | \
+  sha256sum --check
+```
 
+Sonatype publishes each checksum next to the archive: add `.sha256` to the URL.
+
+---
+hideInToc: true
+level: 2
+---
+
+# Unpack into /opt/sonatype
+
+```bash
 sudo mkdir -p /opt/sonatype
-sudo tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
+sudo tar -xzf /tmp/nexus-3.97.2-02-linux-$(uname -m | sed 's/aarch64/aarch_64/').tar.gz \
   --directory=/opt/sonatype \
+  --exclude='sonatype-work*' \
   --keep-directory-symlink
-```
 
----
-hideInToc: true
-level: 2
----
+# Point /opt/sonatype/nexus at this version, so an upgrade is a new symlink
+sudo ln -sfn /opt/sonatype/nexus-3.97.2-02 /opt/sonatype/nexus
 
-# Symlink latest version to /opt/sonatype/nexus
-
-```bash
-# Make a symlink to the latest version as /opt/sonatype/nexus to make it easier to upgrade
-# Pick the latest version explicitly
-sudo ln -s "$(ls -d /opt/sonatype/nexus-* | sort -V | tail -n 1)" /opt/sonatype/nexus
-
-# Verify
 $ readlink /opt/sonatype/nexus
-/opt/sonatype/nexus-3.87.1-01
+/opt/sonatype/nexus-3.97.2-02
 ```
+
+- The archive also holds an empty `sonatype-work` skeleton. Skip it: the data
+  directory goes in `/var/lib/nexus/nexus-data`, outside the versioned install,
+  so an upgrade doesn't touch it
+- The program files stay owned by root. Only the data directory belongs to `nexus`
 
 ---
 hideInToc: true
 level: 2
 ---
 
-# Create user for running Sonatype Nexus
+# Create the nexus user and data directory
 
 ```bash
-# Create user for nexus
 sudo useradd \
   --system \
-  --shell /bin/false \
+  --shell /usr/sbin/nologin \
   --comment "Nexus Repository Manager user" \
   --home-dir /var/lib/nexus \
+  --create-home \
   nexus
 
-sudo mkdir -p /var/lib/nexus
-sudo chown -R nexus:nexus /var/lib/nexus
+sudo install -d -o nexus -g nexus \
+  /var/lib/nexus/nexus-data \
+  /var/lib/nexus/nexus-data/etc
 
-# Define run_as_user as nexus
-sudo tee /opt/sonatype/nexus/bin/nexus.rc > /dev/null <<'EOF'
-run_as_user="nexus"
-EOF
-````
-
----
-hideInToc: true
-level: 2
----
-
-# Create data directory
-
-```bash
-sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
+# The start script switches to this user. Since 3.80 the archive
+# doesn't ship a nexus.rc, so create it
+echo 'run_as_user="nexus"' | sudo tee /opt/sonatype/nexus/bin/nexus.rc
 ```
 
----
-hideInToc: true
-level: 2
----
-
-# Verify install starts up correctly
-
-```bash
-runuser -u nexus -- /bin/bash
-cd /opt/sonatype/nexus/bin
-./nexus run
-
-# Visit http://localhost:8081 in a web browser
-```
+Create `nexus-data` first, as its own argument. `install -d` makes any
+missing parent directories owned by root, and Nexus then can't create `tmp`
+in it (`AccessDeniedException: /var/lib/nexus/nexus-data/tmp`).
 
 ---
 hideInToc: true
 level: 2
 ---
+
+# Move the data directory
+
+`bin/nexus.vmoptions` points the data, log and temporary directories at
+`../sonatype-work/nexus3`. Point them at `/var/lib/nexus/nexus-data`:
 
 ```bash
 # https://help.sonatype.com/en/configuring-the-runtime-environment.html
+sudo sed -i \
+  -e 's|\.\./sonatype-work/nexus3|/var/lib/nexus/nexus-data|' \
+  /opt/sonatype/nexus/bin/nexus.vmoptions
 
-mkdir -p /var/lib/nexus/javaprefs
-chown -R nexus:nexus /var/lib/nexus/javaprefs
-# Add the following to /opt/sonatype/nexus/bin/nexus.vmoptions
-# This will avoid 'java.util.prefs' spamming the log 
--Djava.util.prefs.userRoot=/opt/sonatype/sonatype-work/nexus3/javaprefs
+# Keep java.util.prefs from writing warnings to the log
+echo '-Djava.util.prefs.userRoot=/var/lib/nexus/nexus-data/javaprefs' | \
+  sudo tee -a /opt/sonatype/nexus/bin/nexus.vmoptions
+
+$ grep nexus-data /opt/sonatype/nexus/bin/nexus.vmoptions
+-XX:LogFile=/var/lib/nexus/nexus-data/log/jvm.log
+-Dkaraf.data=/var/lib/nexus/nexus-data
+-Dkaraf.log=/var/lib/nexus/nexus-data/log
+-Djava.io.tmpdir=/var/lib/nexus/nexus-data/tmp
+-Djava.util.prefs.userRoot=/var/lib/nexus/nexus-data/javaprefs
+```
+
+`nexus.vmoptions` is in the versioned directory, so redo this after each upgrade.
+
+---
+hideInToc: true
+level: 2
+---
+
+# Start with no repositories
+
+A new Nexus creates `maven-central`, `nuget-group` and others. To start with
+only the repositories you create, set this before the first start:
+
+```bash
+sudo -u nexus tee /var/lib/nexus/nexus-data/etc/nexus.properties <<'EOF'
+nexus.skipDefaultRepositories=true
+EOF
 ```
 
 ---
@@ -142,41 +153,58 @@ hideInToc: true
 level: 2
 ---
 
-https://github.com/sonatype/nexus-public/issues/458
-
-# Choose a password for the admin user
+# Run Nexus as a systemd service
 
 ```bash
-newpass="superseekret"
-oldpass=$(cat /var/lib/nexus/nexus3/admin.password)
+sudo tee /etc/systemd/system/nexus.service <<'EOF'
+[Unit]
+Description=Nexus Repository Manager
+After=network.target
 
-curl --include --fail \
+[Service]
+Type=forking
+LimitNOFILE=65536
+ExecStart=/opt/sonatype/nexus/bin/nexus start
+ExecStop=/opt/sonatype/nexus/bin/nexus stop
+User=nexus
+Restart=on-abort
+TimeoutSec=600
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now nexus
+
+# The first start takes a minute or two
+until curl --silent --fail http://localhost:8081/service/rest/v1/status/writable; do sleep 5; done
+```
+
+To watch it start in the foreground instead: `sudo -u nexus /opt/sonatype/nexus/bin/nexus run`
+
+---
+hideInToc: true
+level: 2
+---
+
+# Accept the EULA
+
+Nexus Community Edition won't serve anything until the EULA is accepted.
+Do this before changing the password, as both use the initial one:
+
+```bash
+# https://help.sonatype.com/en/eula-rest-api.html
+oldpass=$(sudo cat /var/lib/nexus/nexus-data/admin.password)
+
+disclaimer=$(curl --silent --show-error \
   --user admin:$oldpass \
-  -X PUT \
-  -H 'Content-Type: text/plain' \
-  --data "${newpass}" \
-  http://localhost:8081/service/rest/v1/security/users/admin/change-password
-```
-
----
-hideInToc: true
-level: 2
----
-
-# Accept EULA
-
-https://help.sonatype.com/en/eula-rest-api.html
-
-```bash
-disclaimer=$(curl \
-  --silent --show-error \
-  -u admin:$(cat /var/lib/nexus/nexus3/admin.password) \
-  -X GET 'http://localhost:8081/service/rest/v1/system/eula' | \
+  http://localhost:8081/service/rest/v1/system/eula | \
     jq --raw-output .disclaimer)
 
 curl --include --fail \
+  --user admin:$oldpass \
   -X POST \
-  -u admin:$(cat /var/lib/nexus/nexus3/admin.password) \
   -H 'Content-Type: application/json' \
   -d "{\"accepted\": true, \"disclaimer\": \"${disclaimer}\"}" \
   http://localhost:8081/service/rest/v1/system/eula
@@ -187,14 +215,37 @@ hideInToc: true
 level: 2
 ---
 
-# Configure Anonymous Access
+# Choose a password for the admin user
+
+```bash
+newpass="superseekret"
+
+curl --include --fail \
+  --user admin:$oldpass \
+  -X PUT \
+  -H 'Content-Type: text/plain' \
+  --data "${newpass}" \
+  http://localhost:8081/service/rest/v1/security/users/admin/change-password
+```
+
+Nexus deletes `admin.password` once the password changes. Nexus 3.71
+re-created it on restart, holding the stale initial password
+([nexus-public#458](https://github.com/sonatype/nexus-public/issues/458)).
+3.97.2 doesn't, so its absence means the password has been set.
+
+---
+hideInToc: true
+level: 2
+---
+
+# Configure anonymous access
 
 ```bash
 curl --include --fail \
   --user admin:$newpass \
   -X PUT \
   -H 'Content-Type: application/json' \
-  -d '{"enabled": true, "userId": "anonymous"}' \
+  -d '{"enabled": true, "userId": "anonymous", "realmName": "NexusAuthorizingRealm"}' \
   http://localhost:8081/service/rest/v1/security/anonymous
 ```
 
@@ -377,8 +428,7 @@ It only matters before the first start.
 
 ```bash
 # Tarball install: the data directory's etc/nexus.properties
-sudo -u nexus mkdir -p /opt/sonatype/sonatype-work/nexus3/etc
-sudo -u nexus tee -a /opt/sonatype/sonatype-work/nexus3/etc/nexus.properties > /dev/null <<'EOF'
+sudo -u nexus tee /var/lib/nexus/nexus-data/etc/nexus.properties <<'EOF'
 nexus.skipDefaultRepositories=true
 EOF
 ```

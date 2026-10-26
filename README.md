@@ -37,10 +37,11 @@ Each section is its own file, pulled into [slides.md](./slides.md) with `src:`:
 
 | Directory | Covers |
 | --- | --- |
-| [overview](./overview/slides.md) | Choosing a binary store: Nexus, Artifactory and Pulp pros and cons |
-| [nexus](./nexus/slides.md) | Sonatype Nexus Repository: install from the tarball, with Docker or with Apple container, then the admin password, EULA and anonymous access, and the [boxcutter_sonatype](https://github.com/boxcutter/boxcutter-chef-cookbooks/tree/main/cookbooks/boxcutter_sonatype) setup as `curl` commands |
+| [overview](./overview/slides.md) | Choosing a binary store: Nexus, Artifactory and Pulp pros and cons, and the other options |
+| [nexus](./nexus/slides.md) | Sonatype Nexus Repository: install from the tarball as a systemd service, with Docker or with Apple container, then the admin password, EULA and anonymous access, and the [boxcutter_sonatype](https://github.com/boxcutter/boxcutter-chef-cookbooks/tree/main/cookbooks/boxcutter_sonatype) setup as `curl` commands |
 | [artifactory](./artifactory/slides.md) | JFrog Artifactory |
 | [pulp](./pulp/slides.md) | Pulp: install with Docker, Apple container or by hand, then the [boxcutter_sonatype](https://github.com/boxcutter/boxcutter-chef-cookbooks/tree/main/cookbooks/boxcutter_sonatype) setup redone in Pulp, compared with Nexus |
+| [harbor](./harbor/slides.md) | Harbor: install on premises with the installer and Docker Compose, then the cookbook's Docker setup redone in Harbor (proxy cache, projects, users, robot accounts, Helm charts, Trivy scanning), compared with Nexus |
 
 # Update dependencies
 

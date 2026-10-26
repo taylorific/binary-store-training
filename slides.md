@@ -72,3 +72,7 @@ src: ./artifactory/slides.md
 ---
 src: ./pulp/slides.md
 ---
+
+---
+src: ./harbor/slides.md
+---
