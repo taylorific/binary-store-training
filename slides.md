@@ -55,7 +55,7 @@ routeAlias: toc
 
 # Table of Contents
 
-<Toc columns="2"/>
+<Toc/>
 
 ---
 src: ./nexus/slides.md

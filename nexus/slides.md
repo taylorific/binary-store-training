@@ -10,6 +10,7 @@ layout: section
 
 ---
 layout: section
+level: 2
 ---
 
 # Install self-hosted Nexus Repository
@@ -20,6 +21,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Download and unpack the install archive
@@ -54,6 +56,7 @@ sudo tar -xvzf /tmp/nexus-linux-aarch_64.tar.gz \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Symlink latest version to /opt/sonatype/nexus
@@ -70,6 +73,7 @@ $ readlink /opt/sonatype/nexus
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Create user for running Sonatype Nexus
@@ -94,6 +98,7 @@ EOF
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Create data directory
@@ -104,6 +109,7 @@ sudo chown -R nexus:nexus /opt/sonatype/sonatype-work
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Verify install starts up correctly
@@ -118,6 +124,7 @@ cd /opt/sonatype/nexus/bin
 
 ---
 hideInToc: true
+level: 2
 ---
 
 ```bash
@@ -132,6 +139,7 @@ chown -R nexus:nexus /var/lib/nexus/javaprefs
 
 ---
 hideInToc: true
+level: 2
 ---
 
 https://github.com/sonatype/nexus-public/issues/458
@@ -152,6 +160,7 @@ curl --include --fail \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Accept EULA
@@ -175,6 +184,7 @@ curl --include --fail \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Configure Anonymous Access
@@ -190,6 +200,7 @@ curl --include --fail \
 
 ---
 layout: section
+level: 2
 ---
 
 # Docker install
@@ -200,6 +211,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 ```bash
@@ -211,6 +223,7 @@ docker container run -d \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Apple container install (macOS)
@@ -235,6 +248,7 @@ oldpass=$(container exec nexus cat /nexus-data/admin.password)
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Accept EULA
@@ -258,6 +272,7 @@ curl --include --fail \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 ```bash
@@ -274,6 +289,7 @@ curl --include --fail \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 ```bash
@@ -287,6 +303,7 @@ curl --include --fail \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 ```bash
@@ -297,6 +314,7 @@ hideInToc: true
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Official Image source

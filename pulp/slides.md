@@ -10,6 +10,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # What is Pulp?
@@ -26,6 +27,7 @@ pulp-container 2.30.0, pulp-python 3.37.1 and pulp-npm 0.10.2.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Pulp's building blocks
@@ -43,6 +45,7 @@ Pulp splits that into separate objects you wire together:
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # How the objects fit together
@@ -58,6 +61,7 @@ flowchart LR
 
 ---
 layout: section
+level: 2
 ---
 
 # Pulp in a container
@@ -68,6 +72,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Create the settings file
@@ -97,6 +102,7 @@ EOF
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Docker install
@@ -125,6 +131,7 @@ curl --silent http://localhost:8080/pulp/api/v3/status/ \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Apple container install (macOS)
@@ -154,6 +161,7 @@ Use `container exec` wherever the following slides say `docker exec`.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Choose a password for the admin user
@@ -176,6 +184,7 @@ to skip (Nexus needs `nexus.skipDefaultRepositories=true` for that).
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Install pulp-cli
@@ -205,6 +214,7 @@ PULP_API=http://localhost:8080/pulp/api/v3
 
 ---
 layout: section
+level: 2
 ---
 
 # Install self-hosted Pulp
@@ -215,6 +225,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Packages and user
@@ -244,6 +255,7 @@ sudo chown -R pulp:pulp /var/lib/pulp
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Install Pulp into a virtualenv
@@ -268,6 +280,7 @@ sudo /opt/pulp/bin/pip install \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Create the database
@@ -284,6 +297,7 @@ sudo -u postgres psql -c "CREATE DATABASE pulp OWNER pulp;"
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Configure /etc/pulp/settings.py
@@ -313,6 +327,7 @@ EOF
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Protect the settings
@@ -326,6 +341,7 @@ sudo chmod 0640 /etc/pulp/settings.py /etc/pulp/certs/database_fields.symmetric.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Migrate the database and set the admin password
@@ -344,6 +360,7 @@ sudo -u pulp PULP_SETTINGS=/etc/pulp/settings.py \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Three services instead of one
@@ -361,6 +378,7 @@ The `pulp/pulp` image does that for you on port 80.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # systemd units
@@ -388,6 +406,7 @@ EOF
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # The content app and worker units
@@ -410,6 +429,7 @@ systemd-analyze verify /etc/systemd/system/pulpcore-*.service
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Start and verify
@@ -438,6 +458,7 @@ slides that follow, `http://localhost:8080` becomes `:24817` for API calls and
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Try the manual install in a container
@@ -465,6 +486,7 @@ With Apple container, use `container run -it --rm` with the same flags.
 
 ---
 layout: section
+level: 2
 ---
 
 # The Nexus cookbook, in Pulp
@@ -475,6 +497,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 class: text-xs
 ---
 
@@ -496,6 +519,7 @@ https://github.com/boxcutter/boxcutter-chef-cookbooks/tree/main/cookbooks/boxcut
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Raw hosted: a file repository
@@ -524,6 +548,7 @@ curl http://localhost:8080/pulp/content/testy-hosted/hello.txt
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Raw proxy: no equivalent
@@ -549,6 +574,7 @@ Options:
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # APT proxy: remote and repository
@@ -574,6 +600,7 @@ Schedule the sync (cron, a systemd timer, ...).
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # APT proxy: publish and serve
@@ -601,6 +628,7 @@ so Pulp signs the `Release` file, and give clients that key.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Docker proxy: a pull-through cache
@@ -630,6 +658,7 @@ Each image you pull becomes its own repository and distribution
 
 ---
 hideInToc: true
+level: 2
 class: text-sm
 ---
 
@@ -651,6 +680,7 @@ with `docker`.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # PyPI proxy
@@ -677,6 +707,7 @@ The packages pip downloads are cached in Pulp as content.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # PyPI hosted
@@ -702,6 +733,7 @@ pip install --index-url http://localhost:8080/pypi/pypi-hosted/simple/ hello-box
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # npm proxy and hosted
@@ -730,6 +762,7 @@ curl --silent --fail --user admin:$newpass \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # npm clients
@@ -753,6 +786,7 @@ like Nexus `npm-group`.
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Users
@@ -777,6 +811,7 @@ docker exec -e DJANGO_SUPERUSER_PASSWORD=superseekret pulp \
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Roles
@@ -808,6 +843,7 @@ pulp --username reader --password Readseekret63 file repository create --name x
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Anonymous access
@@ -835,6 +871,7 @@ pulp file distribution update --name testy-hosted --content-guard ""
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # Blob stores
@@ -862,6 +899,7 @@ Content is stored once per SHA-256, however many repositories hold it.
 
 ---
 layout: section
+level: 2
 ---
 
 # Nexus and Pulp compared
@@ -872,6 +910,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 class: text-sm
 ---
 
@@ -889,6 +928,7 @@ class: text-sm
 
 ---
 hideInToc: true
+level: 2
 class: text-sm
 ---
 
@@ -906,6 +946,7 @@ class: text-sm
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # What tripped me up on pulpcore 3.123.1

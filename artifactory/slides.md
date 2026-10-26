@@ -10,6 +10,7 @@ layout: section
 
 ---
 hideInToc: true
+level: 2
 ---
 
 # blah
