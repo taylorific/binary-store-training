@@ -213,6 +213,30 @@ docker container run -d \
 hideInToc: true
 ---
 
+# Apple container install (macOS)
+
+```bash
+container system start   # once per boot
+
+# Nexus defaults to a 2.7 GB Java heap, and containers get 1 GB unless you ask
+container run --detach \
+  --cpus 4 --memory 4g \
+  --publish 8081:8081 \
+  --name nexus \
+  docker.io/sonatype/nexus3
+```
+
+The REST calls on the following slides are the same. Read the initial
+password with `container exec` in place of `docker exec -t`:
+
+```bash
+oldpass=$(container exec nexus cat /nexus-data/admin.password)
+```
+
+---
+hideInToc: true
+---
+
 # Accept EULA
 
 https://help.sonatype.com/en/eula-rest-api.html
