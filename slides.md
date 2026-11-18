@@ -76,3 +76,7 @@ src: ./pulp/slides.md
 ---
 src: ./harbor/slides.md
 ---
+
+---
+src: ./proxy/slides.md
+---
