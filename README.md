@@ -42,6 +42,7 @@ Each section is its own file, pulled into [slides.md](./slides.md) with `src:`:
 | [artifactory](./artifactory/slides.md) | JFrog Artifactory |
 | [pulp](./pulp/slides.md) | Pulp: install with Docker, Apple container or by hand, then the [boxcutter_sonatype](https://github.com/boxcutter/boxcutter-chef-cookbooks/tree/main/cookbooks/boxcutter_sonatype) setup redone in Pulp, compared with Nexus |
 | [harbor](./harbor/slides.md) | Harbor: install on premises with the installer and Docker Compose, then the cookbook's Docker setup redone in Harbor (proxy cache, projects, users, robot accounts, Helm charts, Trivy scanning), compared with Nexus |
+| [proxy](./proxy/slides.md) | Reverse proxies in front of the binary stores: Caddy and nginx compared, each installed on the host and run in a container, with TLS from a local CA, the settings large uploads and `docker push` need, and Pulp and Harbor behind a proxy |
 
 # Update dependencies
 
